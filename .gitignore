@@ -22,3 +22,6 @@ yarn-error.log*
 
 # OS-specific files
 Thumbs.db
+
+vectorstore/
+uploads/

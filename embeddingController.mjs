@@ -6,6 +6,8 @@ import { pinecone } from './utils/pinecone.mjs';
 import { config } from 'dotenv';
 import { PDFLoader } from 'langchain/document_loaders/fs/pdf';
 import { DirectoryLoader } from 'langchain/document_loaders/fs/directory';
+import { CSVLoader } from "langchain/document_loaders/fs/csv";
+
 
 config();
 
@@ -29,6 +31,8 @@ const embeddingController = async (req, res) => {
     /* Load raw docs from all files in the directory */
     const directoryLoader = new DirectoryLoader(filePath, {
       '.pdf': (path) => new PDFLoader(path),
+      '.xlsx': (path) => new CSVLoader(path),
+      '.csv': (path) => new CSVLoader(path)
     });
 
     const rawDocs = await directoryLoader.load();
@@ -55,15 +59,15 @@ const embeddingController = async (req, res) => {
     await vectorStore.save(directory);
 
     /* PINECONE */
-    // const embeddings = new OpenAIEmbeddings();
-    // const index = pinecone.Index(PINECONE_INDEX_NAME);
+    const embeddings = new OpenAIEmbeddings();
+    const index = pinecone.Index(PINECONE_INDEX_NAME);
 
-    // // Embed the PDF documents
-    // await PineconeStore.fromDocuments(docs, embeddings, {
-    //   pineconeIndex: index,
-    //   namespace: PINECONE_NAME_SPACE,
-    //   textKey: 'text',
-    // });
+    // Embed the PDF documents
+    await PineconeStore.fromDocuments(docs, embeddings, {
+      pineconeIndex: index,
+      namespace: PINECONE_NAME_SPACE,
+      textKey: 'text',
+    });
 
 
     res.json({ message: 'Embedding successful' });

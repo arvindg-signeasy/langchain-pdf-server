@@ -9,6 +9,10 @@ import summariseController from './summariseController.mjs';
 import chatController from './chatController.mjs';
 import smallKeypointsController from './smallKeypointsController.mjs';
 import smallChatController from './smallChatController.mjs';
+import csvInsightController from './csvInsightController.mjs';
+import jsonInsightController from './jsonInsightController.mjs';
+import improvementsController from './improvementsController.mjs';
+
 
 
 
@@ -49,7 +53,13 @@ app.post('/chat', chatController);
 
 app.post('/smallchat', smallChatController);
 
+app.post('/jsoninsight', jsonInsightController);
+
+app.get('/csvinsight', csvInsightController);
+
 app.get('/smallkeypoints', smallKeypointsController);
+
+app.get('/improvement', improvementsController);
 
 
 // Start the server

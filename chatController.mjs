@@ -1,6 +1,6 @@
 import fs from "fs";
 import { OpenAI } from "langchain/llms/openai";
-import { ConversationalRetrievalQAChain } from "langchain/chains";
+import { ConversationalRetrievalQAChain, RetrievalQAChain, loadQARefineChain } from "langchain/chains";
 import { BufferMemory } from "langchain/memory";
 import { PineconeStore } from 'langchain/vectorstores/pinecone';
 import { OpenAIEmbeddings } from "langchain/embeddings/openai";
@@ -35,21 +35,19 @@ const chatController = async (req, res) => {
     //   },
     // );
     /* Create the chain */
-    const chain = ConversationalRetrievalQAChain.fromLLM(
-      model,
-      vectorstore.asRetriever(),
-      {
-        memory: new BufferMemory({
-          memoryKey: "chat_history", // Must be set to "chat_history"
-        }),
-      }
-    );
+    
+  const chain = new RetrievalQAChain({
+    combineDocumentsChain: loadQARefineChain(model),
+    retriever: vectorstore.asRetriever(),
+  });
     /* Ask it a question */
-    const question = req.body.chat;
-    const chatResult = await chain.call({ question });
+    const query = req.body.chat;
+    const resultOne = await vectorstore.similaritySearch("Benazir Chatur", 4);
+    console.log(resultOne)
+    const chatResult = await chain.call({ query });
 
     // Return the response or perform any other necessary actions
-    res.status(200).json({ chatResult });
+    res.status(200).json({ chatResult: chatResult.output_text });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });

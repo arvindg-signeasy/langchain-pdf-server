@@ -20,18 +20,26 @@ const upload = multer({ storage });
 
 // Route handler for the /upload API
 const uploadFile = async (req, res) => {
+  console.log(req)
   // Delete existing files in the uploads folder
   await deleteUploads();
 
   // Use the multer upload middleware to handle the file upload
   upload.single('file')(req, res, (err) => {
+    console.log(req)
     if (err) {
       // Handle any upload error
       console.error('Upload error:', err);
       res.status(500).json({ message: 'Upload failed' });
     } else {
+      const uploadedFile = req.file;
+      const fileName = uploadedFile.originalname;
+      const fileExtension = path.extname(fileName);
+
+      console.log('File extension:', fileExtension);
+
       // File uploaded successfully
-      res.json({ message: 'File uploaded successfully!' });
+      res.json({ fileType: fileExtension, message: 'File uploaded successfully!' });
     }
   });
 };
