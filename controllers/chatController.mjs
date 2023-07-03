@@ -36,7 +36,7 @@ const chatController = async (req, res) => {
     const chatResult = await chain.call({ query });
 
     // Return the response or perform any other necessary actions
-    res.status(200).json({ chatResult: chatResult.output_text });
+    res.status(200).json({ chatResult: chatResult.text });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
