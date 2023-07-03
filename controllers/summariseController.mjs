@@ -5,6 +5,7 @@ import { config } from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 import { PDFLoader } from 'langchain/document_loaders/fs/pdf';
+import { storeDocument, getDocumentDetails } from '../firebase/index.mjs';
 
 config();
 
@@ -21,6 +22,11 @@ const summariseController = async (req, res) => {
     const desiredFile = files[0]
     
     // Check if the desired file was found
+  const dbDocumentDetails = await getDocumentDetails(desiredFile)
+  let summary
+  if(dbDocumentDetails?.summary){
+    summary = dbDocumentDetails?.summary
+  } else {
     let rawDocs
     if (desiredFile) {
       // Construct the full path to the file
@@ -43,13 +49,17 @@ const summariseController = async (req, res) => {
 
   const docs = await textSplitter.splitDocuments(rawDocs);
 
+  const chain = loadSummarizationChain(model, {
+    type: "map_reduce",
+  });
+  summary = await chain.call({
+    input_documents: docs,
+  });
+
+  await storeDocument(desiredFile, { summary })
+  }
+
     // This convenience function creates a document chain prompted to summarize a set of documents.
-    const chain = loadSummarizationChain(model, {
-      type: "map_reduce",
-    });
-    const summary = await chain.call({
-      input_documents: docs,
-    });
 
     return res.status(200).json({ result: summary });
   } catch (error) {

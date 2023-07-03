@@ -2,16 +2,16 @@ import express from 'express';
 import multer from 'multer';
 import path from 'path';
 import cors from 'cors';
-import uploadsController from './uploadsController.mjs';
-import embeddingController from './embeddingController.mjs';
-import keypointsController from './keypointsController.mjs';
-import summariseController from './summariseController.mjs';
-import chatController from './chatController.mjs';
-import smallKeypointsController from './smallKeypointsController.mjs';
-import smallChatController from './smallChatController.mjs';
-import csvInsightController from './csvInsightController.mjs';
-import jsonInsightController from './jsonInsightController.mjs';
-import improvementsController from './improvementsController.mjs';
+import uploadsController from './controllers/uploadsController.mjs';
+import embeddingController from './controllers/embeddingController.mjs';
+import keypointsController from './controllers/keypointsController.mjs';
+import summariseController from './controllers/summariseController.mjs';
+import chatController from './controllers/chatController.mjs';
+import smallKeypointsController from './controllers/smallKeypointsController.mjs';
+import smallChatController from './controllers/smallChatController.mjs';
+import csvInsightController from './controllers/csvInsightController.mjs';
+import jsonInsightController from './controllers/jsonInsightController.mjs';
+import improvementsController from './controllers/improvementsController.mjs';
 
 
 

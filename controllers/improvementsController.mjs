@@ -1,37 +1,13 @@
 import { OpenAI } from "langchain/llms/openai";
 import { RetrievalQAChain, loadQARefineChain } from "langchain/chains";
-import { PineconeStore } from 'langchain/vectorstores/pinecone';
-import { OpenAIEmbeddings } from "langchain/embeddings/openai";
-import { pinecone } from './utils/pinecone.mjs';
-import { FaissStore } from 'langchain/vectorstores/faiss';
-
+import { vectorStoreRead } from '../utils/vectorstores.mjs'
 import { config } from 'dotenv';
 
 config();
 
-const PINECONE_INDEX_NAME = process.env.PINECONE_INDEX_NAME
+const improvementsController = async (req, res) => {
 
-const PINECONE_NAME_SPACE = process.env.PINECONE_NAME_SPACE
-
-const keypointsController = async (req, res) => {
-    const index = pinecone.Index(PINECONE_INDEX_NAME);
-
-    /* create vectorstore*/
-  // const vectorstore = await PineconeStore.fromExistingIndex(
-  //   new OpenAIEmbeddings({}),
-  //   {
-  //       pineconeIndex: index,
-  //       textKey: 'text',
-  //       namespace: PINECONE_NAME_SPACE, //namespace comes from your config folder
-  //     },
-  //   );
-
-  const directory = 'vectorstore';
-
-  const vectorstore = await FaissStore.load(
-    directory,
-    new OpenAIEmbeddings({}),
-  );
+  const vectorstore = await vectorStoreRead()
 
   const model = new OpenAI({ temperature: 0 });
 
@@ -40,12 +16,6 @@ const keypointsController = async (req, res) => {
     retriever: vectorstore.asRetriever(),
   });
 
-  const keypoints = [
-    'Signer human name, Signer company name, Signer details, Signee human name, Signee company name, Signee details, Contract type, Contract details',
-    'Effective date, Contract duration, Renewal term, Expiration date, Jurisdiction',
-    'Notice period, Terms for renewal, Termination and expiry, Deliverables and obligations, Payment term',
-    'Payment frequency, Contract value, Liability cap, Business liability, Indemnifying party'
-  ];
   const info = {};
 
   const callChain = async () => {
@@ -128,4 +98,4 @@ const keypointsController = async (req, res) => {
   res.json(formattedInfo);
 };
 
-export default keypointsController
+export default improvementsController

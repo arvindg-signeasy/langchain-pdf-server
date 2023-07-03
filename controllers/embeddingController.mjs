@@ -1,13 +1,11 @@
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
-import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
-import { PineconeStore } from 'langchain/vectorstores/pinecone';
-import { FaissStore } from "langchain/vectorstores/faiss";
-import { pinecone } from './utils/pinecone.mjs';
+import { pinecone } from '../utils/pinecone.mjs';
 import { config } from 'dotenv';
 import { PDFLoader } from 'langchain/document_loaders/fs/pdf';
 import { DirectoryLoader } from 'langchain/document_loaders/fs/directory';
 import { CSVLoader } from "langchain/document_loaders/fs/csv";
-
+import fs from 'fs';
+import { VECTOR, faissStoreWrite, pineconeStoreWrite} from "../utils/vectorstores.mjs"
 
 config();
 
@@ -19,17 +17,8 @@ const PINECONE_NAME_SPACE = process.env.PINECONE_NAME_SPACE
 
 const embeddingController = async (req, res) => {
   try {
-    /* Delete all existing vectors */
-    const pineconeIndex = pinecone.Index(PINECONE_INDEX_NAME);
-    await pineconeIndex.delete1({ deleteAll: true , namespace: PINECONE_NAME_SPACE});
-    const indexStats = await pineconeIndex.describeIndexStats({
-      describeIndexStatsRequest: {},
-    });
-
-    console.log(12, indexStats)
-
-    /* Load raw docs from all files in the directory */
-    const directoryLoader = new DirectoryLoader(filePath, {
+     /* Load raw docs from all files in the directory */
+     const directoryLoader = new DirectoryLoader(filePath, {
       '.pdf': (path) => new PDFLoader(path),
       '.xlsx': (path) => new CSVLoader(path),
       '.csv': (path) => new CSVLoader(path)
@@ -47,27 +36,32 @@ const embeddingController = async (req, res) => {
 
     console.log('Creating vector store...');
 
-    /* FAISS */
+    if( VECTOR === 'faiss' ){
 
-    const vectorStore = await FaissStore.fromDocuments(
-      rawDocs,
-      new OpenAIEmbeddings()
-    );
+      const folderName = 'vectorstore';
+      // Delete the folder if it exists
+      if (fs.existsSync(folderName)) {
+        fs.rmdirSync(folderName, { recursive: true });
+        console.log(`Deleted folder: ${folderName}`);
+      }
 
-    const directory = "vectorstore";
+      // Create a new folder
+      fs.mkdirSync(folderName);
+      console.log(`Created folder: ${folderName}`);
 
-    await vectorStore.save(directory);
+      await faissStoreWrite(rawDocs)
 
-    /* PINECONE */
-    const embeddings = new OpenAIEmbeddings();
-    const index = pinecone.Index(PINECONE_INDEX_NAME);
+    } 
 
-    // Embed the PDF documents
-    await PineconeStore.fromDocuments(docs, embeddings, {
-      pineconeIndex: index,
-      namespace: PINECONE_NAME_SPACE,
-      textKey: 'text',
-    });
+    if( VECTOR === 'pinecone' ){
+
+          /* Delete all existing vectors */
+      const pineconeClient = await pinecone()
+      const pineconeIndex = pineconeClient.Index(PINECONE_INDEX_NAME);
+      await pineconeIndex.delete1({ deleteAll: true , namespace: PINECONE_NAME_SPACE});
+      await pineconeStoreWrite(docs)
+
+    }
 
 
     res.json({ message: 'Embedding successful' });

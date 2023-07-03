@@ -1,12 +1,7 @@
-import fs from "fs";
 import { OpenAI } from "langchain/llms/openai";
-import { ConversationalRetrievalQAChain, RetrievalQAChain, loadQARefineChain } from "langchain/chains";
-import { BufferMemory } from "langchain/memory";
-import { PineconeStore } from 'langchain/vectorstores/pinecone';
-import { OpenAIEmbeddings } from "langchain/embeddings/openai";
-import { pinecone } from './utils/pinecone.mjs';
+import { RetrievalQAChain, loadQARefineChain } from "langchain/chains";
 import { config } from 'dotenv';
-import { FaissStore } from 'langchain/vectorstores/faiss';
+import { vectorStoreRead } from '../utils/vectorstores.mjs'
 
 
 config();
@@ -18,13 +13,9 @@ const PINECONE_NAME_SPACE = process.env.PINECONE_NAME_SPACE
 const chatController = async (req, res) => {
   try {
     const model = new OpenAI({});
-    const index = pinecone.Index(PINECONE_INDEX_NAME);
     const directory = 'vectorstore';
 
-    const vectorstore = await FaissStore.load(
-      directory,
-      new OpenAIEmbeddings({}),
-    );
+    const vectorstore = await vectorStoreRead()
     /* create vectorstore*/
     // const vectorstore = await PineconeStore.fromExistingIndex(
     // new OpenAIEmbeddings({}),
@@ -42,8 +33,6 @@ const chatController = async (req, res) => {
   });
     /* Ask it a question */
     const query = req.body.chat;
-    const resultOne = await vectorstore.similaritySearch("Benazir Chatur", 4);
-    console.log(resultOne)
     const chatResult = await chain.call({ query });
 
     // Return the response or perform any other necessary actions
