@@ -6,7 +6,7 @@ import path from 'path';
 import pdfjsLib from 'pdfjs-dist';
 
 async function parsePDF() {
-    const uploadsFolderPath = path.join(path.dirname(new URL(import.meta.url).pathname), 'uploads');
+    const uploadsFolderPath = path.join(path.dirname(new URL(import.meta.url).pathname), '..', 'uploads');
 
     // Read the uploads folder
     const files = await fs.promises.readdir(uploadsFolderPath);

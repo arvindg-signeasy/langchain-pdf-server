@@ -1,5 +1,5 @@
 import { OpenAI } from "langchain/llms/openai";
-import { RetrievalQAChain, loadQARefineChain } from "langchain/chains";
+import { RetrievalQAChain, loadQARefineChain, loadQAStuffChain } from "langchain/chains";
 import { config } from 'dotenv';
 import { vectorStoreRead } from '../utils/vectorstores.mjs'
 
@@ -12,7 +12,7 @@ const PINECONE_NAME_SPACE = process.env.PINECONE_NAME_SPACE
 
 const chatController = async (req, res) => {
   try {
-    const model = new OpenAI({});
+    const model = new OpenAI({ temperature: 1});
     const directory = 'vectorstore';
 
     const vectorstore = await vectorStoreRead()
@@ -28,8 +28,8 @@ const chatController = async (req, res) => {
     /* Create the chain */
     
   const chain = new RetrievalQAChain({
-    combineDocumentsChain: loadQARefineChain(model),
-    retriever: vectorstore.asRetriever(),
+    combineDocumentsChain: loadQAStuffChain(model),
+    retriever: vectorstore.asRetriever(1),
   });
     /* Ask it a question */
     const query = req.body.chat;

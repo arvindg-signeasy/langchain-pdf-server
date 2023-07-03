@@ -36,7 +36,7 @@ const keypointsController = async (req, res) => {
     });
   
     const keypoints = [
-      'Parties Involved, Signer human name, Signer company name, Signer details, Signee human name, Signee company name, Signee details, Contract type, Contract details',
+      'Parties Involved, Signer human name, Signer company name, Signer details, Signee human name, Signee company name, Signee details, Contract type',
       'Effective date, Contract duration, Renewal term, Expiration date, Jurisdiction',
       'Notice period, Terms for renewal, Termination and expiry, Deliverables and obligations, Payment term',
       'Payment frequency, Contract value, Liability cap, Business liability, Indemnifying party'
