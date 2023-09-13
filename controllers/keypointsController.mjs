@@ -27,8 +27,8 @@ const keypointsController = async (req, res) => {
 
   const dbDocumentDetails = await getDocumentDetails(desiredFile)
   let formattedInfo = {}
-  if(dbDocumentDetails?.keypoints){
-    formattedInfo = dbDocumentDetails?.keypoints
+  if(false && dbDocumentDetails?.keypoints){
+    // formattedInfo = dbDocumentDetails?.keypoints
   } else {
     const chain = new RetrievalQAChain({
       combineDocumentsChain: loadQARefineChain(model),

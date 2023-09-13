@@ -12,6 +12,10 @@ import smallChatController from './controllers/smallChatController.mjs';
 import csvInsightController from './controllers/csvInsightController.mjs';
 import jsonInsightController from './controllers/jsonInsightController.mjs';
 import improvementsController from './controllers/improvementsController.mjs';
+import fileSearchController from './controllers/fileSearchController.mjs';
+import seChatController from './controllers/seChatController.mjs';
+import seKeypointsController from './controllers/seKeypointsController.mjs';
+import seSummaryController from './controllers/seSummaryController.mjs';
 
 
 
@@ -60,6 +64,16 @@ app.get('/csvinsight', csvInsightController);
 app.get('/smallkeypoints', smallKeypointsController);
 
 app.get('/improvement', improvementsController);
+
+app.get('/fileSearch', fileSearchController.getFiles);
+
+app.post('/fileSearch', fileSearchController.searchFiles);
+
+app.post('/se-chat', seChatController);
+
+app.post('/se-keypoints', seKeypointsController);
+
+app.post('/se-summary', seSummaryController);
 
 
 // Start the server

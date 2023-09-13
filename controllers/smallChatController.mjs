@@ -1,6 +1,7 @@
 import { OpenAI } from "langchain/llms/openai";
 import { BufferMemory } from "langchain/memory";
 import { ConversationChain } from "langchain/chains";
+import { ChatAnthropic } from "langchain/chat_models/anthropic";
 import fs from 'fs';
 import path from 'path';
 import pdfjsLib from 'pdfjs-dist';
@@ -47,7 +48,10 @@ const smallChatController = async (req, res) => {
   try {
     parsePDF()
     .then(async (text) => {
-        const model = new OpenAI({});
+      const model = new ChatAnthropic({
+        temperature: 0.9,
+        anthropicApiKey: "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"
+      });
         const memory = new BufferMemory();
         /* Create the chain */
         const chain = new ConversationChain({ llm: model, memory: memory });

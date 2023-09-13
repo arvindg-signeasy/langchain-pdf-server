@@ -1,6 +1,8 @@
 import { FaissStore } from 'langchain/vectorstores/faiss';
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
 import { config } from 'dotenv';
+import { PineconeStore } from "langchain/vectorstores/pinecone";
+import { pinecone } from '../utils/pinecone.mjs';
 
 config();
 
@@ -12,29 +14,29 @@ const directory = "vectorstore";
 
 export const VECTOR = 'faiss'
 
-export const faissStoreWrite = async (rawDocs) => {
+export const faissStoreWrite = async (rawDocs, folderDirectory) => {
     const vectorStore = await FaissStore.fromDocuments(
         rawDocs,
         new OpenAIEmbeddings()
       );
   
-      await vectorStore.save(directory);
+      await vectorStore.save(folderDirectory || directory);
   };
 
-export const faissStoreRead = async () => {
+export const faissStoreRead = async (fileDirectory) => {
     const vectorstore = await FaissStore.load(
-        directory,
+        fileDirectory || directory,
         new OpenAIEmbeddings(),
       )
     return vectorstore
   };
 
 export const pineconeStoreWrite = async (docs) => {
-    await PineconeStore.fromDocuments(docs, new OpenAIEmbeddings(), {
-        pineconeIndex: PINECONE_INDEX_NAME,
-        namespace: PINECONE_NAME_SPACE,
-        textKey: 'text',
-      });
+  const embeddings = new OpenAIEmbeddings();
+  const pineconeClient = await pinecone()
+  const pineconeIndex = pineconeClient.Index(PINECONE_INDEX_NAME);
+  const pineconeStore = new PineconeStore(embeddings, { pineconeIndex });
+  await pineconeStore.addDocuments(docs);
 }
 
 export const pineconeStoreRead = async () => {
@@ -49,12 +51,21 @@ export const pineconeStoreRead = async () => {
     return vectorstore
 }
 
-export const vectorStoreRead = async () => {
+export const vectorStoreRead = async (directory) => {
     if(VECTOR === 'faiss'){
-        return faissStoreRead()
+        return faissStoreRead(directory)
     }
     if(VECTOR === 'pinecone'){
         return pineconeStoreRead()
     }
+}
+
+export const pineconeSearch = async (searchWord) => {
+  const embeddings = new OpenAIEmbeddings();
+  const pineconeClient = await pinecone()
+  const pineconeIndex = pineconeClient.Index(PINECONE_INDEX_NAME);
+  const pineconeStore = new PineconeStore(embeddings, { pineconeIndex });
+  const results = await pineconeStore.similaritySearch(searchWord, 20);
+  return results
 }
 
